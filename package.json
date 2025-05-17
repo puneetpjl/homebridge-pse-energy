@@ -1,13 +1,18 @@
 {
   "name": "homebridge-pse-energy",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "description": "Homebridge plugin to display Puget Sound Energy data via Opower API",
   "main": "dist/index.js",
   "scripts": {
     "build": "tsc",
     "prepublishOnly": "npm run build"
   },
-  "keywords": ["homebridge-plugin", "PSE", "opower", "homekit"],
+  "keywords": [
+    "homebridge-plugin",
+    "PSE",
+    "opower",
+    "homekit"
+  ],
   "engines": {
     "node": ">=16.0.0",
     "homebridge": ">=1.4.0"
@@ -16,6 +21,8 @@
     "axios": "^1.6.0"
   },
   "devDependencies": {
+    "@types/node": "^22.15.18",
+    "homebridge": "^1.6.1",
     "typescript": "^5.0.0"
   }
 }

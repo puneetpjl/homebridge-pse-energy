@@ -18,8 +18,9 @@ export class PSEEnergyPlatform implements DynamicPlatformPlugin {
   }
 
   async discoverDevices() {
-    const accessory = new this.api.platformAccessory('Current Energy Usage', 'pse-energy-usage');
-    new PSEEnergyAccessory(this, accessory);
-    this.api.registerPlatformAccessories('homebridge-pse-energy', 'PSEEnergyPlatform', [accessory]);
-  }
+  const uuid = this.api.hap.uuid.generate('pse-energy-usage'); // ✅ Proper UUID
+  const accessory = new this.api.platformAccessory('Current Energy Usage', uuid);
+  new PSEEnergyAccessory(this, accessory);
+  this.api.registerPlatformAccessories('homebridge-pse-energy', 'PSEEnergyPlatform', [accessory]);
+}
 }
