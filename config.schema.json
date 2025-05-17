@@ -1,0 +1,14 @@
+{
+  "pluginAlias": "PSEEnergyPlatform",
+  "pluginType": "platform",
+  "schema": {
+    "type": "object",
+    "properties": {
+      "platform": { "type": "string", "const": "PSEEnergyPlatform" },
+      "username": { "type": "string", "title": "Username" },
+      "password": { "type": "string", "title": "Password" },
+      "pollingInterval": { "type": "number", "title": "Polling Interval (seconds)", "default": 3600 }
+    },
+    "required": ["platform", "username", "password"]
+  }
+}
