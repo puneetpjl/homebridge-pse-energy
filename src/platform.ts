@@ -3,7 +3,7 @@ import { PSEEnergyAccessory } from './accessory';
 
 export class PSEEnergyPlatform implements DynamicPlatformPlugin {
   private readonly accessories: PlatformAccessory[] = [];
-  private readonly pollingInterval: number;
+  public readonly pollingInterval: number;
   private readonly cookie: string;
   private readonly electricityAgreementId?: string;
   private readonly gasAgreementId?: string;
@@ -14,10 +14,12 @@ export class PSEEnergyPlatform implements DynamicPlatformPlugin {
     public readonly api: API,
   ) {
     this.log.debug('Finished initializing platform:', this.config.platform);
+
     this.pollingInterval = this.config.pollingInterval || 43200;
     this.cookie = this.config.cookie || '';
     this.electricityAgreementId = this.config.electricityAgreementId;
     this.gasAgreementId = this.config.gasAgreementId;
+
     this.api.on('didFinishLaunching', () => this.discoverDevices());
   }
 
@@ -26,15 +28,30 @@ export class PSEEnergyPlatform implements DynamicPlatformPlugin {
   }
 
   async discoverDevices() {
-  const uuid = this.api.hap.uuid.generate('pse-energy-usage'); // ✅ Proper UUID
-  const accessory = new this.api.platformAccessory('Current Energy Usage', uuid);
- 
-  new PSEEnergyAccessory(this, accessory, {
-    cookie: this.cookie,
-    electricityAgreementId: this.electricityAgreementId,
-    gasAgreementId: this.gasAgreementId,
-  });
+    const accessoriesToRegister: PlatformAccessory[] = [];
 
-  this.api.registerPlatformAccessories('homebridge-pse-energy', 'PSEEnergyPlatform', [accessory]);
-}
+    const types = ['electricity', 'gas', 'total'] as const;
+
+    for (const type of types) {
+      const uuid = this.api.hap.uuid.generate(`pse-energy-${type}`);
+      const displayName = `PSE ${type.charAt(0).toUpperCase() + type.slice(1)}`;
+
+      const accessory = new this.api.platformAccessory(displayName, uuid);
+
+      new PSEEnergyAccessory(this, accessory, {
+        cookie: this.cookie,
+        electricityAgreementId: this.electricityAgreementId,
+        gasAgreementId: this.gasAgreementId,
+        type,
+      });
+
+      accessoriesToRegister.push(accessory);
+    }
+
+    this.api.registerPlatformAccessories(
+      'homebridge-pse-energy',
+      'PSEEnergyPlatform',
+      accessoriesToRegister,
+    );
+  }
 }

@@ -2,6 +2,15 @@ import { Service, PlatformAccessory } from 'homebridge';
 import { PSEEnergyPlatform } from './platform';
 import { PSEClient } from './PSEClient';
 
+export type AccessoryType = 'electricity' | 'gas' | 'total';
+
+interface PSEAccessoryOptions {
+  cookie: string;
+  electricityAgreementId?: string;
+  gasAgreementId?: string;
+  type: AccessoryType;
+}
+
 export class PSEEnergyAccessory {
   private service: Service;
   private client: PSEClient;
@@ -9,46 +18,35 @@ export class PSEEnergyAccessory {
   constructor(
     private readonly platform: PSEEnergyPlatform,
     private readonly accessory: PlatformAccessory,
-    private readonly config: {
-      cookie: string;
-      electricityAgreementId?: string;
-      gasAgreementId?: string;
-    }
+    private readonly options: PSEAccessoryOptions,
   ) {
-    this.client = new PSEClient(config);
+    this.client = new PSEClient(options);
 
-    this.accessory.getService(this.platform.api.hap.Service.AccessoryInformation)!
-      .setCharacteristic(this.platform.api.hap.Characteristic.Manufacturer, 'PSE')
-      .setCharacteristic(this.platform.api.hap.Characteristic.Model, 'Energy Monitor');
+    const info = this.accessory.getService(this.platform.api.hap.Service.AccessoryInformation)!;
+    info.setCharacteristic(this.platform.api.hap.Characteristic.Manufacturer, 'PSE')
+        .setCharacteristic(this.platform.api.hap.Characteristic.Model, `PSE ${options.type}`);
 
     this.service = this.accessory.getService(this.platform.api.hap.Service.TemperatureSensor)
-      || this.accessory.addService(this.platform.api.hap.Service.TemperatureSensor);
+        || this.accessory.addService(this.platform.api.hap.Service.TemperatureSensor);
+
+    this.service.setCharacteristic(this.platform.api.hap.Characteristic.Name, `${options.type} usage`);
 
     this.service.getCharacteristic(this.platform.api.hap.Characteristic.CurrentTemperature)
-      .onGet(this.getEnergyUsage.bind(this));
-
-    this.schedulePolling();
+        .onGet(this.getValue.bind(this));
   }
 
-  private async getEnergyUsage(): Promise<number> {
-    try {
-      const usage = await this.client.fetchUsageData();
-      return usage.totalBill || 0;
-    } catch (error) {
-      this.platform.log.error('Failed to fetch usage:', error);
-      return 0;
+  async getValue(): Promise<number> {
+    const data = await this.client.fetchUsageData();
+
+    switch (this.options.type) {
+      case 'electricity':
+        return data.electricityUsage ?? 0;
+      case 'gas':
+        return data.gasUsage ?? 0;
+      case 'total':
+        return data.totalBill ?? 0;
+      default:
+        return 0;
     }
-  }
-
-  private schedulePolling() {
-    const intervalMs = this.platform.pollingInterval * 1000;
-    setInterval(() => {
-      this.getEnergyUsage().then(value => {
-        this.service.updateCharacteristic(
-          this.platform.api.hap.Characteristic.CurrentTemperature,
-          value
-        );
-      });
-    }, intervalMs);
   }
 }

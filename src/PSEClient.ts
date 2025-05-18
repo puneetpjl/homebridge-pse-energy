@@ -14,6 +14,28 @@ interface AgreementConfig {
   gasAgreementId?: string;
 }
 
+interface UsageSummary {
+  currentUsage?: {
+    value: string;
+    unit: string;
+  };
+  projectedCost?: {
+    value: string;
+    unit: string;
+  };
+}
+
+interface CustomerAgreement {
+  agreementId: string;
+  usageSummary?: UsageSummary;
+}
+
+interface CustomerAgreementsResponse {
+  data?: {
+    customerAgreements?: CustomerAgreement[];
+  };
+}
+
 export class PSEClient {
   private readonly headers: Record<string, string>;
 
@@ -26,7 +48,6 @@ export class PSEClient {
 
   async fetchUsageData(): Promise<UsageData> {
     const usageData: UsageData = {};
-    const now = new Date().toISOString().split('T')[0];
 
     const query = `
       query($agreementIds: [ID!]!) {
@@ -66,7 +87,7 @@ export class PSEClient {
       throw new Error(`Failed to fetch data: ${res.status} ${res.statusText}`);
     }
 
-    const json = await res.json();
+    const json = await res.json() as CustomerAgreementsResponse;
 
     for (const agreement of json.data?.customerAgreements || []) {
       const usage = parseFloat(agreement.usageSummary?.currentUsage?.value || '0');
