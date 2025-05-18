@@ -1,6 +1,6 @@
 {
   "name": "homebridge-pse-energy",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "description": "Homebridge plugin to display Puget Sound Energy data via Opower API",
   "main": "dist/index.js",
   "scripts": {
@@ -18,7 +18,8 @@
     "homebridge": ">=1.4.0"
   },
   "dependencies": {
-    "axios": "^1.6.0"
+    "axios": "^1.6.0",
+    "node-fetch": "^3.3.2"
   },
   "devDependencies": {
     "@types/node": "^22.15.18",
