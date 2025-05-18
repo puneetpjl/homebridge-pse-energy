@@ -7,7 +7,25 @@
       "platform": { "type": "string", "const": "PSEEnergyPlatform" },
       "username": { "type": "string", "title": "Username" },
       "password": { "type": "string", "title": "Password" },
-      "pollingInterval": { "type": "number", "title": "Polling Interval (seconds)", "default": 3600 }
+      "pollingInterval": {
+        "type": "number",
+        "title": "Polling Interval (seconds)",
+        "default": 43200
+      },
+      "cookie": {
+        "type": "string",
+        "title": "Session Cookie",
+        "description": "Paste your PSE session cookie from browser (required for current data)"
+      },
+      "electricityAgreementId": {
+        "type": "string",
+        "title": "Electricity Agreement ID",
+        "description": "Get this from API: dsm-graphql → account → agreements"
+      },
+      "gasAgreementId": {
+        "type": "string",
+        "title": "Gas Agreement ID"
+      }
     },
     "required": ["platform", "username", "password"]
   }
